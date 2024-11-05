@@ -30,12 +30,23 @@ import glfw
 import mujoco
 from mujoco import _simulate
 import numpy as np
+import importlib
+
+import example
+
+importlib.reload(example)
 
 if not glfw._glfw:  # pylint: disable=protected-access
   raise RuntimeError('GLFW dynamic library handle is not available')
 else:
   _simulate.set_glfw_dlhandle(glfw._glfw._handle)  # pylint: disable=protected-access
 
+python_source = "example.py"
+
+
+
+
+  
 # Logarithmically spaced realtime slow-down coefficients (percent).
 PERCENT_REALTIME = (
     100, 80, 66, 50, 40, 33, 25, 20, 16, 13,
@@ -217,8 +228,8 @@ def _reload(
     EKOX(path)
     simulate.load(m, d, path)
 
-    ti_m = os.path.getmtime(path)
-    
+    ti_m = os.path.getmtime(python_source)
+    EKOX(ti_m)    
     # Make sure any load_error message is cleared
     simulate.load_error = ''
 
@@ -265,19 +276,26 @@ def _physics_loop(simulate: _Simulate, loader: Optional[_InternalLoaderType], pa
         ctrl_noise = np.zeros((m.nu,))
 
     reload = False
-
     # Sleep for 1 ms or yield, to let main thread run.
     if simulate.run != 0 and simulate.busywait != 0:
       time.sleep(0)
     else:
       time.sleep(0.001)
     try :
-        ti_m2 = os.path.getmtime(path)
+        ti_m2 = os.path.getmtime(python_source)
         if (ti_m2 > ti_m) :
             EKOT("reload")
+            importlib.reload(example)
+            EKO()
+            pth = "toto.xml"
+            with open(pth, "w") as fd :
+              EKO()
+              fd.write(example.muj.xml(pth))
+              EKO()
+              fd.close()
             reload = True
-    except :
-        pass
+    except Exception as e:
+        EKOX(e)
     with simulate.lock():
       if m is not None:
         assert d is not None
@@ -516,6 +534,7 @@ def launch_passive(
   return handle_return.get()
 
 
+
 if __name__ == '__main__':
   # pylint: disable=g-bad-import-order
   from absl import app  # pylint: disable=g-import-not-at-top
@@ -526,7 +545,14 @@ if __name__ == '__main__':
   def main(argv) -> None:
     del argv
     if _MJCF_PATH.value is not None:
-      launch_from_path(os.path.expanduser(_MJCF_PATH.value))
+
+      pth = "toto.xml"
+      with open(pth, "w") as fd :
+        fd.write(example.muj.xml(pth))
+        fd.close()
+      launch_from_path(os.path.expanduser(pth))
+      
+      #launch_from_path(os.path.expanduser(_MJCF_PATH.value))
     else:
       launch()
 
