@@ -43,6 +43,6 @@ while True :
                 break
             #mujoco.mj_step(m, d)
             time.sleep(1./240.)
-            EKO()
+
 
 

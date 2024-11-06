@@ -40,6 +40,9 @@ muj= Mujoco(model="example")(
              reflectance=0.2)),
   Worldbody(
       Light(pos=(0,1,1), dir=(0,-1, -1), diffuse=(1,1,1)),
+      Geom(name="floor", size=(0,0,0.05), _type=plane, material=groundplane),
+      Body(pos(0,0,0))(
+		  Geom(_type=box, size=0.01, rgba=(0.1, 0.9, 0.1, 1), fromto=(0,0,0, 0,0,0.1))),
       Body(pos(0,0,1))(
 		  Joint(_type=ball),
 		  Geom(_type=capsule, size=0.06, fromto=(0,0,0, 0,0,-0.4))),

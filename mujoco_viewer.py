@@ -31,22 +31,28 @@ import mujoco
 from mujoco import _simulate
 import numpy as np
 import importlib
+import importlib.util
 
-import example
-
-importlib.reload(example)
 
 if not glfw._glfw:  # pylint: disable=protected-access
-  raise RuntimeError('GLFW dynamic library handle is not available')
+    raise RuntimeError('GLFW dynamic library handle is not available')
 else:
-  _simulate.set_glfw_dlhandle(glfw._glfw._handle)  # pylint: disable=protected-access
+    _simulate.set_glfw_dlhandle(glfw._glfw._handle)  # pylint: disable=protected-access
 
 python_source = "example.py"
+def load_python() :            
+    module = os.path.splitext(python_source)[0]
+    spec = importlib.util.spec_from_file_location("module.name", python_source)
+    foo = importlib.util.module_from_spec(spec)
+    sys.modules["module.name"] = foo
+    EKO()
+    spec.loader.exec_module(foo)
+    #importlib.reload(module)
+    return foo
 
 
 
 
-  
 # Logarithmically spaced realtime slow-down coefficients (percent).
 PERCENT_REALTIME = (
     100, 80, 66, 50, 40, 33, 25, 20, 16, 13,
@@ -73,102 +79,102 @@ _Simulate = _simulate.Simulate
 
 
 class Handle:
-  """A handle for interacting with a MuJoCo viewer."""
+    """A handle for interacting with a MuJoCo viewer."""
 
-  def __init__(
-      self,
-      sim: _Simulate,
-      cam: mujoco.MjvCamera,
-      opt: mujoco.MjvOption,
-      pert: mujoco.MjvPerturb,
-      user_scn: Optional[mujoco.MjvScene],
-  ):
-    self._sim = weakref.ref(sim)
-    self._cam = cam
-    self._opt = opt
-    self._pert = pert
-    self._user_scn = user_scn
+    def __init__(
+        self,
+        sim: _Simulate,
+        cam: mujoco.MjvCamera,
+        opt: mujoco.MjvOption,
+        pert: mujoco.MjvPerturb,
+        user_scn: Optional[mujoco.MjvScene],
+    ):
+        self._sim = weakref.ref(sim)
+        self._cam = cam
+        self._opt = opt
+        self._pert = pert
+        self._user_scn = user_scn
 
-  @property
-  def cam(self):
-    return self._cam
+    @property
+    def cam(self):
+        return self._cam
 
-  @property
-  def opt(self):
-    return self._opt
+    @property
+    def opt(self):
+        return self._opt
 
-  @property
-  def perturb(self):
-    return self._pert
+    @property
+    def perturb(self):
+        return self._pert
 
-  @property
-  def user_scn(self):
-    return self._user_scn
+    @property
+    def user_scn(self):
+        return self._user_scn
 
-  @property
-  def m(self):
-    sim = self._sim()
-    if sim is not None:
-      return sim.m
-    return None
-
-  @property
-  def d(self):
-    sim = self._sim()
-    if sim is not None:
-      return sim.d
-    return None
-
-  def close(self):
-    sim = self._sim()
-    if sim is not None:
-      sim.exit()
-
-  def _get_sim(self) -> Optional[_Simulate]:
-    sim = self._sim()
-    if sim is not None:
-      try:
-        return sim if sim.exitrequest == 0 else None
-      except mujoco.UnexpectedError:
-        # UnexpectedError is raised when accessing `exitrequest` after the
-        # underlying simulate instance has been deleted in C++.
+    @property
+    def m(self):
+        sim = self._sim()
+        if sim is not None:
+            return sim.m
         return None
-    return None
 
-  def is_running(self) -> bool:
-    return self._get_sim() is not None
+    @property
+    def d(self):
+        sim = self._sim()
+        if sim is not None:
+            return sim.d
+        return None
 
-  def lock(self):
-    sim = self._get_sim()
-    if sim is not None:
-      return sim.lock()
-    return contextlib.nullcontext()
+    def close(self):
+        sim = self._sim()
+        if sim is not None:
+            sim.exit()
 
-  def sync(self):
-    sim = self._get_sim()
-    if sim is not None:
-      sim.sync()  # locks internally
+    def _get_sim(self) -> Optional[_Simulate]:
+        sim = self._sim()
+        if sim is not None:
+            try:
+                return sim if sim.exitrequest == 0 else None
+            except mujoco.UnexpectedError:
+                # UnexpectedError is raised when accessing `exitrequest` after the
+                # underlying simulate instance has been deleted in C++.
+                return None
+        return None
 
-  def update_hfield(self, hfieldid: int):
-    sim = self._get_sim()
-    if sim is not None:
-      sim.update_hfield(hfieldid)  # locks internally and blocks until done
+    def is_running(self) -> bool:
+        return self._get_sim() is not None
 
-  def update_mesh(self, meshid: int):
-    sim = self._get_sim()
-    if sim is not None:
-      sim.update_mesh(meshid)  # locks internally and blocks until done
+    def lock(self):
+        sim = self._get_sim()
+        if sim is not None:
+            return sim.lock()
+        return contextlib.nullcontext()
 
-  def update_texture(self, texid: int):
-    sim = self._get_sim()
-    if sim is not None:
-      sim.update_texture(texid)  # locks internally and blocks until done
+    def sync(self):
+        sim = self._get_sim()
+        if sim is not None:
+            sim.sync()  # locks internally
 
-  def __enter__(self):
-    return self
+    def update_hfield(self, hfieldid: int):
+        sim = self._get_sim()
+        if sim is not None:
+            sim.update_hfield(hfieldid)  # locks internally and blocks until done
 
-  def __exit__(self, exc_type, exc_val, exc_tb):
-    self.close()
+    def update_mesh(self, meshid: int):
+        sim = self._get_sim()
+        if sim is not None:
+            sim.update_mesh(meshid)  # locks internally and blocks until done
+
+    def update_texture(self, texid: int):
+        sim = self._get_sim()
+        if sim is not None:
+            sim.update_texture(texid)  # locks internally and blocks until done
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
 
 
 # Abstract base dispatcher class for systems that require UI calls to be made
@@ -176,14 +182,14 @@ class Handle:
 # Python launcher (mjpython) to implement the required dispatching mechanism.
 class _MjPythonBase(metaclass=abc.ABCMeta):
 
-  def launch_on_ui_thread(
-      self,
-      model: mujoco.MjModel,
-      data: mujoco.MjData,
-      handle_return: Optional['queue.Queue[Handle]'],
-      key_callback: Optional[KeyCallbackType],
-  ):
-    pass
+    def launch_on_ui_thread(
+        self,
+        model: mujoco.MjModel,
+        data: mujoco.MjData,
+        handle_return: Optional['queue.Queue[Handle]'],
+        key_callback: Optional[KeyCallbackType],
+    ):
+        pass
 
 ti_m = None
 # When running under mjpython, the launcher initializes this object.
@@ -191,190 +197,190 @@ _MJPYTHON: Optional[_MjPythonBase] = None
 
 
 def _file_loader(path: str) -> _LoaderWithPathType:
-  """Loads an MJCF model from file path."""
-  EKOX(path)
-  def load(path=path) -> Tuple[mujoco.MjModel, mujoco.MjData, str]:
-    if len(path) >= 4 and path[-4:] == '.mjb':
-      m = mujoco.MjModel.from_binary_path(path)
-    else:
-      m = mujoco.MjModel.from_xml_path(path)
-    d = mujoco.MjData(m)
-    return m, d, path
+    """Loads an MJCF model from file path."""
+    EKOX(path)
+    def load(path=path) -> Tuple[mujoco.MjModel, mujoco.MjData, str]:
+        if len(path) >= 4 and path[-4:] == '.mjb':
+            m = mujoco.MjModel.from_binary_path(path)
+        else:
+            m = mujoco.MjModel.from_xml_path(path)
+        d = mujoco.MjData(m)
+        return m, d, path
 
-  return load
+    return load
 
 
 def _reload(
     simulate: _Simulate, loader: _InternalLoaderType,
     notify_loaded: Optional[Callable[[], None]] = None
 ) -> Optional[Tuple[mujoco.MjModel, mujoco.MjData]]:
-  """Internal function for reloading a model in the viewer."""
-  try:
-    simulate.load_message('') # path is unknown at this point
-    load_tuple = loader()
-  except Exception as e:  # pylint: disable=broad-except
-    simulate.load_error = str(e)
-    simulate.load_message_clear()
-  else:
-    m, d = load_tuple[:2]
+    """Internal function for reloading a model in the viewer."""
+    try:
+        simulate.load_message('') # path is unknown at this point
+        load_tuple = loader()
+    except Exception as e:  # pylint: disable=broad-except
+        simulate.load_error = str(e)
+        simulate.load_message_clear()
+    else:
+        m, d = load_tuple[:2]
 
-    # If the loader does not raise an exception then we assume that it
-    # successfully created mjModel and mjData. This is specified in the type
-    # annotation, but we perform a runtime assertion here as well to prevent
-    # possible segmentation faults.
-    assert m is not None and d is not None
+        # If the loader does not raise an exception then we assume that it
+        # successfully created mjModel and mjData. This is specified in the type
+        # annotation, but we perform a runtime assertion here as well to prevent
+        # possible segmentation faults.
+        assert m is not None and d is not None
 
-    path = load_tuple[2] if len(load_tuple) == 3 else ''
-    EKOX(path)
-    simulate.load(m, d, path)
+        path = load_tuple[2] if len(load_tuple) == 3 else ''
+        EKOX(path)
+        simulate.load(m, d, path)
+        ti_m = 0
+        try :
+            ti_m = os.path.getmtime(python_source)
+            EKOX(ti_m)
+        except :
+            pass
+        # Make sure any load_error message is cleared
+        simulate.load_error = ''
 
-    ti_m = os.path.getmtime(python_source)
-    EKOX(ti_m)    
-    # Make sure any load_error message is cleared
-    simulate.load_error = ''
+        if notify_loaded:
+            notify_loaded()
 
-    if notify_loaded:
-      notify_loaded()
-
-    return m, d, ti_m
+        return m, d, ti_m
 
 
 def _physics_loop(simulate: _Simulate, loader: Optional[_InternalLoaderType], path=None):
-  """Physics loop for the GUI, to be run in a separate thread."""
-  m: mujoco.MjModel = None
-  d: mujoco.MjData = None
-  EKOX(path)
-  ctrl_noise = np.array([])
-  reload = True
+    """Physics loop for the GUI, to be run in a separate thread."""
+    m: mujoco.MjModel = None
+    d: mujoco.MjData = None
+    EKOX(path)
+    ctrl_noise = np.array([])
+    reload = True
 
-  # CPU-sim synchronization point.
-  synccpu = 0.0
-  syncsim = 0.0
+    # CPU-sim synchronization point.
+    synccpu = 0.0
+    syncsim = 0.0
 
-  EKOX(path)
+    EKOX(path)
 
-  
-  # Run until asked to exit.
-  while not simulate.exitrequest:
-    if simulate.droploadrequest:
-      simulate.droploadrequest = 0
-      loader = _file_loader(simulate.dropfilename)
-      reload = True
 
-    
-      
-
-      
-    if simulate.uiloadrequest:
-      simulate.uiloadrequest_decrement()
-      reload = True
-
-    if reload and loader is not None:
-      result = _reload(simulate, loader)
-      if result is not None:
-        m, d, ti_m = result
-        ctrl_noise = np.zeros((m.nu,))
-
-    reload = False
-    # Sleep for 1 ms or yield, to let main thread run.
-    if simulate.run != 0 and simulate.busywait != 0:
-      time.sleep(0)
-    else:
-      time.sleep(0.001)
-    try :
-        ti_m2 = os.path.getmtime(python_source)
-        if (ti_m2 > ti_m) :
-            EKOT("reload")
-            importlib.reload(example)
-            EKO()
-            pth = "toto.xml"
-            with open(pth, "w") as fd :
-              EKO()
-              fd.write(example.muj.xml(pth))
-              EKO()
-              fd.close()
+    # Run until asked to exit.
+    while not simulate.exitrequest:
+        if simulate.droploadrequest:
+            simulate.droploadrequest = 0
+            loader = _file_loader(simulate.dropfilename)
             reload = True
-    except Exception as e:
-        EKOX(e)
-    with simulate.lock():
-      if m is not None:
-        assert d is not None
-        if simulate.run:
-          stepped = False
-          # Record CPU time at start of iteration.
-          startcpu = time.time()
 
-          elapsedcpu = startcpu - synccpu
-          elapsedsim = d.time - syncsim
+        if simulate.uiloadrequest:
+            simulate.uiloadrequest_decrement()
+            reload = True
 
-          # Inject noise.
-          if simulate.ctrl_noise_std != 0.0:
-            # Convert rate and scale to discrete time (Ornstein–Uhlenbeck).
-            rate = math.exp(-m.opt.timestep /
-                            max(simulate.ctrl_noise_rate, mujoco.mjMINVAL))
-            scale = simulate.ctrl_noise_std * math.sqrt(1 - rate * rate)
+        if reload and loader is not None:
+            result = _reload(simulate, loader)
+            if result is not None:
+                m, d, ti_m = result
+                ctrl_noise = np.zeros((m.nu,))
 
-            for i in range(m.nu):
-              # Update noise.
-              ctrl_noise[i] = (rate * ctrl_noise[i] +
-                               scale * mujoco.mju_standardNormal(None))
+        reload = False
+        # Sleep for 1 ms or yield, to let main thread run.
+        if simulate.run != 0 and simulate.busywait != 0:
+            time.sleep(0)
+        else:
+            time.sleep(0.001)
+        try :
+            ti_m2 = os.path.getmtime(python_source)
+            if (ti_m2 > ti_m) :
+                #EKOT("reload")
+                foo = load_python()
+                #EKO()
+                pth = "toto.xml"
+                with open(pth, "w") as fd :
+                    #EKO()
+                    fd.write(foo.muj.xml())
+                    #EKO()
+                    fd.close()
+                reload = True
+        except Exception as e:
+            pass
+            #EKOX(e)
+        with simulate.lock():
+            if m is not None:
+                assert d is not None
+                if simulate.run:
+                    stepped = False
+                    # Record CPU time at start of iteration.
+                    startcpu = time.time()
 
-              # Apply noise.
-              d.ctrl[i] = ctrl_noise[i]
+                    elapsedcpu = startcpu - synccpu
+                    elapsedsim = d.time - syncsim
 
-          # Requested slow-down factor.
-          slowdown = 100 / PERCENT_REALTIME[simulate.real_time_index]
+                    # Inject noise.
+                    if simulate.ctrl_noise_std != 0.0:
+                # Convert rate and scale to discrete time (Ornstein–Uhlenbeck).
+                        rate = math.exp(-m.opt.timestep /
+                                        max(simulate.ctrl_noise_rate, mujoco.mjMINVAL))
+                        scale = simulate.ctrl_noise_std * math.sqrt(1 - rate * rate)
 
-          # Misalignment: distance from target sim time > MAX_SYNC_MISALIGN.
-          misaligned = abs(elapsedcpu / slowdown -
-                           elapsedsim) > MAX_SYNC_MISALIGN
+                        for i in range(m.nu):
+                    # Update noise.
+                            ctrl_noise[i] = (rate * ctrl_noise[i] +
+                                             scale * mujoco.mju_standardNormal(None))
 
-          # Out-of-sync (for any reason): reset sync times, step.
-          if (elapsedsim < 0 or elapsedcpu < 0 or synccpu == 0 or misaligned or
-              simulate.speed_changed):
-            # Re-sync.
-            synccpu = startcpu
-            syncsim = d.time
-            simulate.speed_changed = False
+                            # Apply noise.
+                            d.ctrl[i] = ctrl_noise[i]
 
-            # Run single step, let next iteration deal with timing.
-            mujoco.mj_step(m, d)
-            stepped = True
+                    # Requested slow-down factor.
+                    slowdown = 100 / PERCENT_REALTIME[simulate.real_time_index]
+
+                    # Misalignment: distance from target sim time > MAX_SYNC_MISALIGN.
+                    misaligned = abs(elapsedcpu / slowdown -
+                                     elapsedsim) > MAX_SYNC_MISALIGN
+
+                    # Out-of-sync (for any reason): reset sync times, step.
+                    if (elapsedsim < 0 or elapsedcpu < 0 or synccpu == 0 or misaligned or
+                        simulate.speed_changed):
+                        # Re-sync.
+                        synccpu = startcpu
+                        syncsim = d.time
+                        simulate.speed_changed = False
+
+                        # Run single step, let next iteration deal with timing.
+                        mujoco.mj_step(m, d)
+                        stepped = True
 
 
 
-            
-          # In-sync: step until ahead of cpu.
-          else:
-            measured = False
-            prevsim = d.time
-            refreshtime = SIM_REFRESH_FRACTION / simulate.refresh_rate
-            # Step while sim lags behind CPU and within refreshtime.
-            while (((d.time - syncsim) * slowdown <
-                    (time.time() - synccpu)) and
-                   ((time.time() - startcpu) < refreshtime)):
-              # Measure slowdown before first step.
-              if not measured and elapsedsim:
-                simulate.measured_slowdown = elapsedcpu / elapsedsim
-                measured = True
 
-              # Call mj_step.
-              mujoco.mj_step(m, d)
-              stepped = True
+                    # In-sync: step until ahead of cpu.
+                    else:
+                        measured = False
+                        prevsim = d.time
+                        refreshtime = SIM_REFRESH_FRACTION / simulate.refresh_rate
+                        # Step while sim lags behind CPU and within refreshtime.
+                        while (((d.time - syncsim) * slowdown <
+                                (time.time() - synccpu)) and
+                               ((time.time() - startcpu) < refreshtime)):
+                            # Measure slowdown before first step.
+                            if not measured and elapsedsim:
+                                simulate.measured_slowdown = elapsedcpu / elapsedsim
+                                measured = True
 
-              # Break if reset.
-              if d.time < prevsim:
-                break
+                            # Call mj_step.
+                            mujoco.mj_step(m, d)
+                            stepped = True
 
-          # save current state to history buffer
-          if (stepped):
-            simulate.add_to_history()
+                            # Break if reset.
+                            if d.time < prevsim:
+                                break
 
-        else:  # simulate.run is False: GUI is paused.
+                    # save current state to history buffer
+                    if (stepped):
+                        simulate.add_to_history()
 
-          # Run mj_forward, to update rendering and joint sliders.
-          mujoco.mj_forward(m, d)
-          simulate.speed_changed = True
+                else:  # simulate.run is False: GUI is paused.
+
+                    # Run mj_forward, to update rendering and joint sliders.
+                    mujoco.mj_forward(m, d)
+                    simulate.speed_changed = True
 
 
 def _launch_internal(
@@ -385,76 +391,76 @@ def _launch_internal(
     loader: Optional[_InternalLoaderType] = None,
     handle_return: Optional['queue.Queue[Handle]'] = None,
     key_callback: Optional[KeyCallbackType] = None,
-    show_left_ui: bool = False,  #True,
-    show_right_ui: bool = False, #True,
+    show_left_ui: bool = True,
+    show_right_ui: bool = True,
     path=None
 ) -> None:
-  """Internal API, so that the public API has more readable type annotations."""
-  if model is None and data is not None:
-    raise ValueError('mjData is specified but mjModel is not')
-  elif callable(model) and data is not None:
-    raise ValueError(
-        'mjData should not be specified when an mjModel loader is used')
-  elif loader is not None and model is not None:
-    raise ValueError('model and loader are both specified')
-  elif run_physics_thread and handle_return is not None:
-    raise ValueError('run_physics_thread and handle_return are both specified')
+    """Internal API, so that the public API has more readable type annotations."""
+    if model is None and data is not None:
+        raise ValueError('mjData is specified but mjModel is not')
+    elif callable(model) and data is not None:
+        raise ValueError(
+            'mjData should not be specified when an mjModel loader is used')
+    elif loader is not None and model is not None:
+        raise ValueError('model and loader are both specified')
+    elif run_physics_thread and handle_return is not None:
+        raise ValueError('run_physics_thread and handle_return are both specified')
 
-  if loader is None and model is not None:
+    if loader is None and model is not None:
 
-    def _loader(m=model, d=data) -> Tuple[mujoco.MjModel, mujoco.MjData]:
-      if d is None:
-        d = mujoco.MjData(m)
-      return m, d
+        def _loader(m=model, d=data) -> Tuple[mujoco.MjModel, mujoco.MjData]:
+            if d is None:
+                d = mujoco.MjData(m)
+            return m, d
 
-    loader = _loader
+        loader = _loader
 
-  cam = mujoco.MjvCamera()
-  opt = mujoco.MjvOption()
-  pert = mujoco.MjvPerturb()
-  if model and not run_physics_thread:
-    user_scn = mujoco.MjvScene(model, _Simulate.MAX_GEOM)
-  else:
-    user_scn = None
-  simulate = _Simulate(
-      cam, opt, pert, user_scn, run_physics_thread, key_callback
-  )
-
-  simulate.ui0_enable = show_left_ui
-  simulate.ui1_enable = show_right_ui
-
-  # Initialize GLFW if not using mjpython.
-  if _MJPYTHON is None:
-    if not glfw.init():
-      raise mujoco.FatalError('could not initialize GLFW')
-    atexit.register(glfw.terminate)
-
-  notify_loaded = None
-  if handle_return:
-    notify_loaded = lambda: handle_return.put_nowait(
-        Handle(simulate, cam, opt, pert, user_scn)
+    cam = mujoco.MjvCamera()
+    opt = mujoco.MjvOption()
+    pert = mujoco.MjvPerturb()
+    if model and not run_physics_thread:
+        user_scn = mujoco.MjvScene(model, _Simulate.MAX_GEOM)
+    else:
+        user_scn = None
+    simulate = _Simulate(
+        cam, opt, pert, user_scn, run_physics_thread, key_callback
     )
 
-  if run_physics_thread:
-    side_thread = threading.Thread(
-        target=_physics_loop, args=(simulate, loader, path))
-  else:
-    side_thread = threading.Thread(
-        target=_reload, args=(simulate, loader, notify_loaded))
+    simulate.ui0_enable = show_left_ui
+    simulate.ui1_enable = show_right_ui
 
-  def make_exit(simulate):
-    def exit_simulate():
-      simulate.exit()
-    return exit_simulate
+    # Initialize GLFW if not using mjpython.
+    if _MJPYTHON is None:
+        if not glfw.init():
+            raise mujoco.FatalError('could not initialize GLFW')
+        atexit.register(glfw.terminate)
 
-  exit_simulate = make_exit(simulate)
-  atexit.register(exit_simulate)
+    notify_loaded = None
+    if handle_return:
+        notify_loaded = lambda: handle_return.put_nowait(
+            Handle(simulate, cam, opt, pert, user_scn)
+        )
 
-  side_thread.start()
-  simulate.render_loop()
-  atexit.unregister(exit_simulate)
-  side_thread.join()
-  simulate.destroy()
+    if run_physics_thread:
+        side_thread = threading.Thread(
+            target=_physics_loop, args=(simulate, loader, path))
+    else:
+        side_thread = threading.Thread(
+            target=_reload, args=(simulate, loader, notify_loaded))
+
+    def make_exit(simulate):
+        def exit_simulate():
+            simulate.exit()
+        return exit_simulate
+
+    exit_simulate = make_exit(simulate)
+    atexit.register(exit_simulate)
+
+    side_thread.start()
+    simulate.render_loop()
+    atexit.unregister(exit_simulate)
+    side_thread.join()
+    simulate.destroy()
 
 
 def launch(
@@ -465,22 +471,22 @@ def launch(
     show_left_ui: bool = True,
     show_right_ui: bool = True,
 ) -> None:
-  """Launches the Simulate GUI."""
-  EKO()
-  _launch_internal(
-      model,
-      data,
-      run_physics_thread=True,
-      loader=loader,
-      show_left_ui=show_left_ui,
-      show_right_ui=show_right_ui,
-  )
+    """Launches the Simulate GUI."""
+    EKO()
+    _launch_internal(
+        model,
+        data,
+        run_physics_thread=True,
+        loader=loader,
+        show_left_ui=show_left_ui,
+        show_right_ui=show_right_ui,
+    )
 
 
 def launch_from_path(path: str) -> None:
-  """Launches the Simulate GUI from file path."""
-  EKOX(path)
-  _launch_internal(run_physics_thread=True, loader=_file_loader(path), path=path)
+    """Launches the Simulate GUI from file path."""
+    EKOX(path)
+    _launch_internal(run_physics_thread=True, loader=_file_loader(path), path=path)
 
 
 def launch_passive(
@@ -491,69 +497,73 @@ def launch_passive(
     show_left_ui: bool = True,
     show_right_ui: bool = True,
 ) -> Handle:
-  """Launches a passive Simulate GUI without blocking the running thread."""
-  if not isinstance(model, mujoco.MjModel):
-    raise ValueError(f'`model` is not a mujoco.MjModel: got {model!r}')
-  if not isinstance(data, mujoco.MjData):
-    raise ValueError(f'`data` is not a mujoco.MjData: got {data!r}')
-  if key_callback is not None and not callable(key_callback):
-    raise ValueError(
-        f'`key_callback` is not callable: got {key_callback!r}')
+    """Launches a passive Simulate GUI without blocking the running thread."""
+    if not isinstance(model, mujoco.MjModel):
+        raise ValueError(f'`model` is not a mujoco.MjModel: got {model!r}')
+    if not isinstance(data, mujoco.MjData):
+        raise ValueError(f'`data` is not a mujoco.MjData: got {data!r}')
+    if key_callback is not None and not callable(key_callback):
+        raise ValueError(
+            f'`key_callback` is not callable: got {key_callback!r}')
 
-  mujoco.mj_forward(model, data)
-  handle_return = queue.Queue(1)
+    mujoco.mj_forward(model, data)
+    handle_return = queue.Queue(1)
 
-  if sys.platform != 'darwin':
-    thread = threading.Thread(
-        target=_launch_internal,
-        args=(model, data),
-        kwargs=dict(
-            run_physics_thread=False,
-            handle_return=handle_return,
-            key_callback=key_callback,
-            show_left_ui=show_left_ui,
-            show_right_ui=show_right_ui,
-        ),
-    )
-    thread.daemon = True
-    thread.start()
-  else:
-    if not isinstance(_MJPYTHON, _MjPythonBase):
-      raise RuntimeError(
-          '`launch_passive` requires that the Python script be run under '
-          '`mjpython` on macOS')
-    _MJPYTHON.launch_on_ui_thread(
-        model,
-        data,
-        handle_return,
-        key_callback,
-        show_left_ui,
-        show_right_ui,
-    )
+    if sys.platform != 'darwin':
+        thread = threading.Thread(
+            target=_launch_internal,
+            args=(model, data),
+            kwargs=dict(
+                run_physics_thread=False,
+                handle_return=handle_return,
+                key_callback=key_callback,
+                show_left_ui=show_left_ui,
+                show_right_ui=show_right_ui,
+            ),
+        )
+        thread.daemon = True
+        thread.start()
+    else:
+        if not isinstance(_MJPYTHON, _MjPythonBase):
+            raise RuntimeError(
+                '`launch_passive` requires that the Python script be run under '
+                '`mjpython` on macOS')
+        _MJPYTHON.launch_on_ui_thread(
+            model,
+            data,
+            handle_return,
+            key_callback,
+            show_left_ui,
+            show_right_ui,
+        )
 
-  return handle_return.get()
+    return handle_return.get()
 
 
 
 if __name__ == '__main__':
-  # pylint: disable=g-bad-import-order
-  from absl import app  # pylint: disable=g-import-not-at-top
-  from absl import flags  # pylint: disable=g-import-not-at-top
+    # pylint: disable=g-bad-import-order
+    from absl import app  # pylint: disable=g-import-not-at-top
+    from absl import flags  # pylint: disable=g-import-not-at-top
 
-  _MJCF_PATH = flags.DEFINE_string('mjcf', None, 'Path to MJCF file.')
+    _MJCF_PATH = flags.DEFINE_string('mjcf', None, 'Path to MJCF file.')
+    _PY_PATH = flags.DEFINE_string('py', None, 'Path to python file.')
 
-  def main(argv) -> None:
-    del argv
-    if _MJCF_PATH.value is not None:
+    def main(argv) -> None:
+        del argv
+        if _PY_PATH.value is not None:
+            EKOX(os.path.splitext(_PY_PATH.value))
+            python_source = _PY_PATH.value
+            foo = load_python()
+            
+            pth = "toto.xml"
+            with open(pth, "w") as fd :
+                fd.write(foo.muj.xml())
+                fd.close()
+                launch_from_path(os.path.expanduser(pth))
+        if _MJCF_PATH.value is not None:
+            launch_from_path(os.path.expanduser(_MJCF_PATH.value))
+        else:
+            launch()
 
-      pth = "toto.xml"
-      with open(pth, "w") as fd :
-        fd.write(example.muj.xml(pth))
-        fd.close()
-      launch_from_path(os.path.expanduser(pth))
-      
-      #launch_from_path(os.path.expanduser(_MJCF_PATH.value))
-    else:
-      launch()
-
-  app.run(main)
+    app.run(main)
