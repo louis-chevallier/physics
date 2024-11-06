@@ -558,7 +558,7 @@ if __name__ == '__main__':
             
             pth = "toto.xml"
             with open(pth, "w") as fd :
-                fd.write(foo.muj.xml())
+                fd.write(foo.muj().xml())
                 fd.close()
                 launch_from_path(os.path.expanduser(pth))
         if _MJCF_PATH.value is not None:

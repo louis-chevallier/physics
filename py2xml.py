@@ -6,6 +6,7 @@ import numpy as np
 from collections import OrderedDict
 from itertools import chain, combinations, product
 import xmltodict
+import trimesh
 EKO()
 from pyhull.convex_hull import ConvexHull
 EKO()
@@ -16,7 +17,6 @@ def xml(x, tab="") :
         return tab + str(x)
     else:
         s = x.xml(tab)
-        EKOX(s)
         return s
 
 
@@ -125,6 +125,9 @@ class X :
             self.a = a
             self.p = {}
             pass
+    def add(self, x) :
+        self.a = list(self.a) + [ x]
+        
     def sname(self) : return self.__class__.__name__
 
     def params(self) :
@@ -159,12 +162,24 @@ class X :
 class Mujoco(X) :
     def __init__(self, model=None) :
             super().__init__()
-            self.model = model          
+            self.model = model
+                
             pass
     def __call__(self, *a) :
             self.a = a
-            return self
+            self.assets().add(Material(name=blue, rgba=(0,0,1,1)))
 
+            
+            return self
+    def worldbody(self) :        return self.find("Worldbody")
+    def assets(self) :        return self.find("Asset")
+
+    def find(self, n) :
+        for e in self.a :
+            EKOX(e.sname())
+            if e.sname() == n:
+                return e
+        return None
 
     
 class Default(X) :
@@ -182,6 +197,8 @@ class Geom(X) :
                  rgba=None,
                  _type=None,
                  size=None,
+                 quat=None,
+                 pos=None,
                  material=None,
                  fromto=None) :
             super().__init__()
@@ -192,6 +209,8 @@ class Geom(X) :
             self.size=size
             self.fromto=fromto
             self.name=name
+            self.quat = quat
+            self.pos = pos
 
 
 class Asset(X) :
@@ -202,7 +221,9 @@ class Asset(X) :
 class Worldbody(X) :
     def __init__(self, *a) :
             super().__init__(a) 
-            pass    
+            pass
+
+        
 
 class Light(X) :
     def __init__(self,
@@ -266,7 +287,8 @@ class Material(X) :
                  rgb2 =None,
                  width=None,
                  height=None,
-                 name=None) :
+                 name=None,
+                 rgba=None) :
             super().__init__()
             #self._type=_type,
             self.groundplane =groundplane
@@ -274,6 +296,7 @@ class Material(X) :
             self.texuniform=texuniform
             self.texrepeat =texrepeat
             self.reflectance =reflectance 
+            self.rgba =rgba 
             self.rgb1 =rgb1 
             self.rgb2 =rgb2 
             self.width=width
@@ -339,7 +362,7 @@ mass="mass"
 
 
 
-
+blue="blue"
 
 mesh="mesh"
 damping="damping"
@@ -362,7 +385,19 @@ skybox="skybox"
 builtin="builtin"
 edge = "edge"
 
-
+def axis() :
+    e, l=0.008, 1.
+    alpha = np.pi/2
+    origin, xaxis, yaxis, zaxis = [0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 1]    
+    EKOX(trimesh.transformations.quaternion_about_axis(alpha, xaxis))
+    quat1 = tuple(trimesh.transformations.quaternion_about_axis(alpha, xaxis))
+    quat2 = tuple(trimesh.transformations.quaternion_about_axis(alpha, yaxis))
+    b = Body(pos(0,0,0))(
+        Geom(size=(e,l), _type=cylinder, material=blue),
+        Geom(pos=(0,l,-l), size=(e,l), _type=cylinder, quat=quat1, material=blue),
+        Geom(pos=(l,0,-l), size=(e,l), _type=cylinder, quat=quat2, material=blue))
+    return b
+    
 if __name__ == '__main__':
         example = Mujoco(model="example")(
                 Default(
@@ -374,7 +409,7 @@ if __name__ == '__main__':
                                 width=32,
                                 height=512),
                         Texture(name=grid,
-                                _type=_2d_,
+                                _type=_2d,
                                 builtin=checker,
                                 width=512,
                                 height=512,
@@ -386,7 +421,7 @@ if __name__ == '__main__':
                                  texrepeat=(1,1),
                                  reflectance=0.2),
                         Texture(name=groundplane,
-                                _type=_2d_,
+                                _type=_2d,
                                 builtin=checker,
                                 mark=edge,
                                 width=300,
@@ -413,6 +448,10 @@ if __name__ == '__main__':
                                 Geom(_type=box, size=0.06, fromto=(0,0,0, -0.3,0,0)))))
         
         EKO()
+        
+
+        example.worldbody().add(axis())
+        
         e1 = example
         EKOX("\n" + e1.xml())
 

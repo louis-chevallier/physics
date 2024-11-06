@@ -1,11 +1,15 @@
 
-startxx :
+startx :
 	python py2xml.py
 #	python convert_mjcf.py
 
-start:
+commit :
+	git commit -a -m xxx
+	git push
+
+start :
 #	python test_mujoco.py --xml 2.xml
-#	python mujoco_viewer.py --mjcf=2.xml
+#	python mujoco_viewer.py --mjcf=toto.xml
 	python mujoco_viewer.py --py=example.py
 
 yy:
