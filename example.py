@@ -39,11 +39,11 @@ muj= Mujoco(model="example")(
              texrepeat=(5,5),
              reflectance=0.2)),
   Worldbody(
-    Light(pos=(0,1,1), dir=(0,-1, -1), diffuse=(1,1,1)),
-    Body(pos(0,0,1))(
-      Joint(_type=ball),
-      Geom(_type=box, size=0.06, fromto=(0,0,0, 0,0,-0.4))),
-    Body(pos=pos(0,0,-0.4))(
-      Joint(axis=(0,1,0)),
-      Joint(axis=(1,0,0)),
-      Geom(_type=sphere, size=0.06, fromto=(0,0,0, -0.3,0,0)))))
+      Light(pos=(0,1,1), dir=(0,-1, -1), diffuse=(1,1,1)),
+      Body(pos(0,0,1))(
+		  Joint(_type=ball),
+		  Geom(_type=capsule, size=0.06, fromto=(0,0,0, 0,0,-0.4))),
+      Body(pos=pos(0,0,-0.4))(
+		  Joint(axis=(0,1,0)),
+		  Joint(axis=(1,0,0)),
+		  Geom(_type=capsule, size=0.06, fromto=(0,0,0, -0.3,0,0)))))

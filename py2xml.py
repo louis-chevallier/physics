@@ -214,6 +214,9 @@ class Texture(X) :
 
 		
 ball="ball"
+sphere="sphere"
+capsule="capsule"
+ellipsoid="ellipsoid"
 box="box"
 cylinder="cylinder"
 skybox="skybox"
