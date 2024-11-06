@@ -126,7 +126,7 @@ class X :
             self.p = {}
             pass
     def add(self, x) :
-        self.a = list(self.a) + [ x]
+        self.a = list(self.a) +  x
         
     def sname(self) : return self.__class__.__name__
 
@@ -167,7 +167,7 @@ class Mujoco(X) :
             pass
     def __call__(self, *a) :
             self.a = a
-            self.assets().add(Material(name=blue, rgba=(0,0,1,1)))
+            self.assets().add([Material(name=blue, rgba=(0,0,1,1))])
 
             
             return self
@@ -450,7 +450,7 @@ if __name__ == '__main__':
         EKO()
         
 
-        example.worldbody().add(axis())
+        example.worldbody().add([axis()])
         
         e1 = example
         EKOX("\n" + e1.xml())
