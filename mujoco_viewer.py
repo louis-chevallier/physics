@@ -291,17 +291,19 @@ def _physics_loop(simulate: _Simulate, loader: Optional[_InternalLoaderType], pa
             if (ti_m2 > ti_m) :
                 #EKOT("reload")
                 foo = load_python()
-                #EKO()
+                ti_m = os.path.getmtime(python_source)                
+                EKOT("reloaded")
                 pth = "toto.xml"
                 with open(pth, "w") as fd :
                     #EKO()
-                    fd.write(foo.muj.xml())
-                    #EKO()
+                    s = foo.muj().xml()
+                    EKOX(len(s))
+                    status = fd.write(s)
+                    EKOX(status)
                     fd.close()
                 reload = True
         except Exception as e:
-            pass
-            #EKOX(e)
+            EKOX(e)
         with simulate.lock():
             if m is not None:
                 assert d is not None
@@ -560,7 +562,7 @@ if __name__ == '__main__':
             with open(pth, "w") as fd :
                 fd.write(foo.muj().xml())
                 fd.close()
-                launch_from_path(os.path.expanduser(pth))
+            launch_from_path(os.path.expanduser(pth))
         if _MJCF_PATH.value is not None:
             launch_from_path(os.path.expanduser(_MJCF_PATH.value))
         else:

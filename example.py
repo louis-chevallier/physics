@@ -2,7 +2,6 @@ from py2xml import *
 from py2xml import _2d
 
 
-
 def muj() :
     r =  Mujoco(model="example")(
         Default(
@@ -47,25 +46,21 @@ def muj() :
         
         Worldbody(
             Light(pos=(0,1,1), dir=(0,-1, -1), diffuse=(1,1,1)),
-            Body(pos(0,0.,-1))(
+            Body(pos(0,0.,-0.5))(
                 Geom(name="floor", size=(0,0,0.05), _type=plane, material=groundplane))))
 
-    l = [
-        Body(pos(0,0.5,0))(
-		    Geom(_type=box, size=0.01, rgba=(0.1, 0.9, 0.1, 1), fromto=(0,0,0, 0,0,0.1)))]
-
+    l = []
     l.append(
-        Body(pos(0,0.5,1))(
-		    Joint(_type=ball),
-		    Geom(_type=capsule, size=0.06, fromto=(0,0,0, 0,0,-0.4))))
-
-    if False :
-        l.append(Body(pos=pos(0,0.5,-0.4))(
+        Body(pos(0,0.5,0.6))(
+		    #Joint(_type=ball),
+		    Geom(_type=box, size=0.06, fromto=(0,0,0, 0,0,0.3))))
+    if True :
+        l.append(Body(pos=pos(0,0.5,0.01))(
 		    Joint(axis=(0,1,0)),
-		    Joint(axis=(1,0,0)),
-		    Geom(_type=capsule, size=0.06, fromto=(0,0,0, -0.3,0,0))))
-
-    if (True) :
+		    #Joint(axis=(1,0,0)),
+		    Geom(_type=cylinder, size=0.06, fromto=(0,0,0, -0.3,0,0))))
+        
+    if (False) :
         l = []        
         e = (0.2, 0.3, 0.4)
         

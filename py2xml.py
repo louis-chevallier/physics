@@ -198,6 +198,7 @@ class Geom(X) :
                  _type=None,
                  size=None,
                  quat=None,
+                 axisangle=None,
                  pos=None,
                  material=None,
                  fromto=None) :
@@ -211,6 +212,7 @@ class Geom(X) :
             self.name=name
             self.quat = quat
             self.pos = pos
+            self.axisangle = axisangle
 
 
 class Asset(X) :
