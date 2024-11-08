@@ -262,7 +262,6 @@ def _physics_loop(simulate: _Simulate, loader: Optional[_InternalLoaderType], pa
 
     EKOX(path)
 
-
     # Run until asked to exit.
     while not simulate.exitrequest:
         if simulate.droploadrequest:
@@ -303,7 +302,8 @@ def _physics_loop(simulate: _Simulate, loader: Optional[_InternalLoaderType], pa
                     fd.close()
                 reload = True
         except Exception as e:
-            EKOX(e)
+            #EKOX(e)
+            pass
         with simulate.lock():
             if m is not None:
                 assert d is not None

@@ -12,6 +12,8 @@ start :
 #	python mujoco_viewer.py --mjcf=toto.xml
 #	python mujoco_viewer.py --py=example.py
 	python carport.py
+#	python build_3D.py; openscad example.scad
+
 
 yy:
 	python reader.py --urdf 1.urdf

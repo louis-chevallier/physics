@@ -50,15 +50,25 @@ def muj() :
                 Geom(name="floor", size=(0,0,0.05), _type=plane, material=groundplane))))
 
     l = []
-    l.append(
-        Body(pos(0,0.5,0.6))(
-		    #Joint(_type=ball),
-		    Geom(_type=box, size=0.06, fromto=(0,0,0, 0,0,0.3))))
     if True :
-        l.append(Body(pos=pos(0,0.5,0.01))(
+        l.append(
+            Body(pos(0,0.5,0.01))(
+		        Joint(axis=(1,0,0)),  # orthogonal à la shape ( donné par fromto)            
+		        #Joint(_type=ball),
+		        Geom(_type=box, size=0.06, fromto=(0.15, 0, 0,    -0.001, 0.3, 0.))))
+    if True :
+        l.append(Body(pos=pos(0.5,0.5,0.01))(
 		    Joint(axis=(0,1,0)),
 		    #Joint(axis=(1,0,0)),
-		    Geom(_type=cylinder, size=0.06, fromto=(0,0,0, -0.3,0,0))))
+		    Geom(_type=cylinder, size=0.06, fromto=(0,0,0, -0.3, 0, 0)),
+            Body(pos(0,0.05,0.01))(
+		        Joint(axis=(1,0,0)),  # orthogonal à la shape ( donné par fromto)            
+		        #Joint(_type=ball),
+		        Geom(_type=box, size=0.06, fromto=(0.15, 0, 0,    -0.001, 0.3, 0.)))))
+
+
+
+
         
     if (False) :
         l = []        
@@ -71,7 +81,6 @@ def muj() :
 		    Joint(_type=ball),
 		    Geom(_type=capsule, size=0.06, fromto=(0,0,0, 0,0,-0.4))))
     
-
 
     
     r.worldbody().add([axis()])
