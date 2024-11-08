@@ -1,4 +1,9 @@
 
+install :
+	pip install mujoco
+	pip install xmltodict
+	mamba install pyhull numpy-stl
+
 startx :
 	python py2xml.py
 #	python convert_mjcf.py
@@ -10,7 +15,9 @@ commit :
 start :
 #	python test_mujoco.py --xml 2.xml
 #	python mujoco_viewer.py --mjcf=toto.xml
-#	python mujoco_viewer.py --py=example.py
+	python mujoco_viewer.py --py=example.py
+
+carport :
 	python carport.py
 #	python build_3D.py; openscad example.scad
 
