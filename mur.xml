@@ -1,0 +1,56 @@
+<mujoco model="Active adhesion example">
+  <!--
+      Adding some fluid viscosity to prevent the hanging sphere from jiggling too much.
+  -->
+  <option viscosity="1"/>
+  
+  <size memory="10M"/>
+  
+  <visual>
+    <headlight diffuse=".2 .2 .2"/>
+  </visual>
+  
+  <default>
+    <joint damping=".3" axis="0 1 0"/>
+    <geom type="box" friction=".5"/>
+    <default class="wall">
+      <geom rgba=".5 .5 .5 .4"/>
+    </default>
+    <default class="mechanical">
+      <geom rgba=".5 .5 .8 1"/>
+      <tendon rgba=".5 .5 .8 1"/>
+    </default>
+    <default class="active_adhesion">
+      <!--
+          Geoms in the active_adhesion class are "inflated" with a margin of 1cm, but contacts are
+          activated only at a depth gap of 1cm, leading to a layer of inactive contacts at a 1cm
+          distance from the surface. However the contacts can be used by the adhesion actuator.
+      -->
+      <geom rgba=".8 .5 .5 1" margin=".01" gap=".01"/>
+    </default>
+    <default class="object">
+      <geom rgba=".5 .8 .5 1" density="100"/>
+    </default>
+  </default>
+  
+  <worldbody>
+    <light pos="0.4 -.15 .6" dir="-1 .5 -1" diffuse=".7 .7 .7"/>
+    <light pos="-.4 -.15 .6" dir="1 .5 -1" diffuse=".7 .7 .7"/>
+
+    <!--
+    <geom name="ground" type="plane" pos="0 0 0" size="0.5 1 2" rgba=" .25 .26 .25 1"/>
+    -->
+
+    
+    <!-- ======= Beam ======= -->
+    <body name="beam" pos="0 0 0" axisangle="0 1 0 0.9" >
+      <!--density of the rod is ten times smaller than other objects (e.g. the ball) for a better point mass approximation-->
+      <geom name="rod" type="cylinder" pos="0 0 0.0" size=".01 .1" density="100"/>
+      <geom pos="0 0 -.1" type="capsule" size=".01 .2" euler="1.57 0 0"/>
+      <joint name="pivot" pos="0 0 -0.1" axis="0 1 0" limited="false" damping=".05"/>
+      <body name="ballbody" pos="0 0 0.1">
+        <geom name="ballgeom" type="sphere" size=".05"/>
+      </body>
+    </body>
+  </worldbody>
+</mujoco>

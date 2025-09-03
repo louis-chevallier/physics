@@ -15,6 +15,9 @@ install :
 	pip install mujoco
 	pip install xmltodict
 	mamba install pyhull numpy-stl
+	mamba install solidpython
+	pip install glfw
+
 
 startx :
 	python py2xml.py
@@ -29,7 +32,8 @@ commit :
 start1 :
 #	python test_mujoco.py --xml toto.xml
 #	python mujoco_viewer.py --mjcf=toto.xml
-	python mujoco_viewer.py --py=example.py
+#	python mujoco_viewer.py --py=example.py
+	python mujoco_viewer.py --mjcf=4-bar.xml
 
 carport :
 	python carport.py

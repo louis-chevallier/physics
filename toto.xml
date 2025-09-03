@@ -1,0 +1,37 @@
+<mujoco model="example">
+  <default >
+    <geom rgba="0.8 0.6 0.4 1"/>
+  </default>
+  <asset >
+    <texture type="skybox" builtin="gradient" rgb1="0.3 0.5 0.7" width="32" height="512"/>
+    <texture type="skybox" builtin="gradient" rgb1="0.3 0.5 0.7" width="32" height="512"/>
+    <texture type="2d" builtin="checker" rgb1="0.1 0.2 0.3" rgb2="0.2 0.3 0.4" width="512" height="512" name="grid"/>
+    <material texture="grid" texuniform="true" texrepeat="1 1" reflectance="0.2" name="grid"/>
+    <texture type="2d" builtin="checker" rgb1="0.2 0.3 0.4" rgb2="0.1 0.2 0.3" width="300" height="300" name="groundplane" mark="edge" markrgb="0.8 0.8 0.8"/>
+    <material texture="groundplane" texuniform="true" texrepeat="5 5" reflectance="0.2" name="groundplane"/>
+    <material rgba="0 0 1 1" name="blue"/>
+  </asset>
+  <worldbody >
+    <light pos="0 1 1" dir="0 -1 -1" diffuse="1 1 1"/>
+    <body pos="0 0.0 -0.5">
+      <geom material="groundplane" type="plane" size="0 0 0.05" name="floor"/>
+    </body>
+    <body pos="0 0 0">
+      <geom material="blue" type="cylinder" size="0.008 1.0"/>
+      <geom material="blue" type="cylinder" size="0.008 1.0" quat="0.7071067811865476 0.7071067811865475 0.0 0.0" pos="0 1.0 -1.0"/>
+      <geom material="blue" type="cylinder" size="0.008 1.0" quat="0.7071067811865476 0.0 0.7071067811865475 0.0" pos="1.0 0 -1.0"/>
+    </body>
+    <body pos="0 0.5 0.01">
+      <joint axis="1 0 0"/>
+      <geom type="box" size="0.06" fromto="0.15 0 0 -0.001 0.3 0.0"/>
+    </body>
+    <body pos="0.5 0.5 0.01">
+      <joint axis="0 1 0"/>
+      <geom type="cylinder" size="0.06" fromto="0 0 0 -0.3 0 0"/>
+      <body pos="0 0.05 0.01">
+        <joint axis="1 0 0"/>
+        <geom type="box" size="0.06" fromto="0.15 0 0 -0.001 0.3 0.0"/>
+      </body>
+    </body>
+  </worldbody>
+</mujoco>
