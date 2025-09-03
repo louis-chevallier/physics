@@ -2,7 +2,7 @@ import mujoco
 import time
 import itertools
 import numpy as np
-import mediapy as media
+#import mediapy as media
 import matplotlib.pyplot as plt
 from utillc import *
 import os
@@ -41,7 +41,7 @@ while True :
                 EKOT("reload")
                 m,d,ti = load()
                 break
-            #mujoco.mj_step(m, d)
+            mujoco.mj_step(m, d)
             time.sleep(1./240.)
 
 

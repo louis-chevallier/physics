@@ -1,4 +1,16 @@
 
+#cd .. ; git clone https://github.com/google-deepmind/mujoco_menagerie.git
+
+
+models = $(wildcard ../mujoco_menagerie/*/*.xml)
+$(warning $(models))
+
+start :
+	python mujoco_viewer.py --mjcf=car.xml
+
+start3 :
+	$(foreach i , $(models), python mujoco_viewer.py --mjcf=$i; )
+
 install :
 	pip install mujoco
 	pip install xmltodict
@@ -12,8 +24,10 @@ commit :
 	git commit -a -m xxx
 	git push
 
-start :
-#	python test_mujoco.py --xml 2.xml
+
+
+start1 :
+#	python test_mujoco.py --xml toto.xml
 #	python mujoco_viewer.py --mjcf=toto.xml
 	python mujoco_viewer.py --py=example.py
 
