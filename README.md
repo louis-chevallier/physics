@@ -18,3 +18,7 @@ j = axe(b1.a, b2.b)
 
 r = roue(d=60)
 
+# other envs
+
+Isaac, Drake, Mujoco and Pybullet, Box2D
+
