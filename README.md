@@ -20,5 +20,5 @@ r = roue(d=60)
 
 # other envs
 
-Isaac, Drake, Mujoco and Pybullet, Box2D
+Isaac, Drake, Mujoco and Pybullet, Box2D, Gazebo, Genesis
 
